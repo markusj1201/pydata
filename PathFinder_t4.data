@@ -1,0 +1,42 @@
+from t4 import list_packages, Package
+MODULE_PATH = []
+
+
+class DataPackageImporter:
+    """
+    Data package module loader. Executes package import code and adds the package to the
+    module cache.
+    """
+
+    @classmethod
+    def create_module(cls, spec):
+        """
+        Module creator. Returning None causes Python to use the default module creator.
+        """
+        return None
+
+    @classmethod
+    def exec_module(cls, module):
+        """
+        Module executor.
+        """
+        name_parts = module.__name__.split('.')
+
+        if module.__name__ == 't4.data':
+            # __path__ must be set even if the package is virtual, but can be set to [].
+            module.__path__ = MODULE_PATH
+            return module
+
+        elif len(name_parts) == 3:  # e.g. module.__name__ == t4.data.foo
+            namespace = name_parts[2]
+
+            for pkg in list_packages():
+                pkg_user, pkg_name = pkg.split('/')
+                if pkg_user == namespace:
+                    module.__dict__[pkg_name] = Package.browse(pkg)
+
+            module.__path__ = MODULE_PATH
+            return module
+
+        else:
+            assert False
