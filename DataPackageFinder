@@ -1,0 +1,18 @@
+from importlib.machinery import ModuleSpec
+
+class DataPackageFinder:
+    """
+    Data package module loader finder. This class sits on `sys.meta_path` and returns the
+    loader it knows for a given path, if it knows a compatible loader.
+    """
+
+    @classmethod
+    def find_spec(cls, fullname, path=None, target=None):
+        """
+        This functions is what gets executed by the loader.
+        """
+        name_parts = fullname.split('.')
+        if name_parts[:2] != ['t4', 'data'] or len(name_parts) > 3:
+            return None
+        else:
+            return ModuleSpec(fullname, DataPackageImporter())
